@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Pixel Ads</title>
+
+<style>
+body{
+    background:#111;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    color:white;
+}
+
+#board{
+    width:1920px;
+    height:1080px;
+    position:relative;
+    background:#222;
+}
+
+.pixel{
+    width:20px;  /* Зменшено */
+    height:20px; /* Зменшено */
+    position:absolute;
+    border:1px solid rgba(255,255,255,0.1);
+    cursor:pointer;
+    overflow:hidden;
+}
+
+.pixel img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+#panel{
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#000;
+    padding:20px;
+    border:1px solid #555;
+    display:none;
+}
+</style>
+</head>
+
+<body>
+
+<div id="board"></div>
+
+<div id="panel">
+<p>Оплати і завантаж свою картинку</p>
+
+<a href="ton://transfer/UQBIq4lgh5fLw61AFhgttUko0fwuns9-GZQMNcQg4AoaQkgZ">
+<button>Оплатити</button>
+</a>
+
+<br><br>
+
+<input type="file" id="upload" accept="image/*">
+
+</div>
+
+<script>
+const board = document.getElementById("board");
+const panel = document.getElementById("panel");
+const upload = document.getElementById("upload");
+
+let selectedPixel = null;
+const size = 20; // Зменшено
+
+for(let y = 0; y < 1080; y += size){
+  for(let x = 0; x < 1920; x += size){
+
+    let pixel = document.createElement("div");
+    pixel.className = "pixel";
+    pixel.style.left = x + "px";
+    pixel.style.top = y + "px";
+
+    pixel.onclick = function(){
+        selectedPixel = pixel;
+        panel.style.display = "block";
+    }
+
+    board.appendChild(pixel);
+  }
+}
+
+upload.onchange = function(e){
+
+    if(!selectedPixel) return;
+
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(event){
+        const img = document.createElement("img");
+        img.src = event.target.result;
+
+        selectedPixel.innerHTML = "";
+        selectedPixel.appendChild(img);
+    }
+
+    reader.readAsDataURL(file);
+}
+</script>
+
+</body>
+
+</html>
