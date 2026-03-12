@@ -56,7 +56,7 @@ body{
 <div id="panel">
 <p>Оплати і завантаж свою картинку</p>
 
-<a href="ton://transfer/UQBIq4lgh5fLw61AFhgttUko0fwuns9-GZQMNcQg4AoaQkgZ">
+<a href="https://app.tonkeeper.com/transfer/UQBIq4lgh5fLw61AFhgttUko0fwuns9-GZQMNcQg4AoaQkgZ" target="_blank">
 <button>Оплатити</button>
 </a>
 
@@ -111,4 +111,5 @@ upload.onchange = function(e){
 </script>
 
 </body>
+
 </html>
