@@ -2,6 +2,7 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pixel Ads</title>
 
 <style>
@@ -12,6 +13,8 @@ body{
     align-items:center;
     height:100vh;
     color:white;
+    margin:0;
+    overflow:hidden;
 }
 
 #board{
@@ -22,8 +25,8 @@ body{
 }
 
 .pixel{
-    width:20px;  /* Зменшено */
-    height:20px; /* Зменшено */
+    width:20px;
+    height:20px;
     position:absolute;
     border:1px solid rgba(255,255,255,0.1);
     cursor:pointer;
@@ -45,6 +48,14 @@ body{
     padding:20px;
     border:1px solid #555;
     display:none;
+    z-index:1000;
+}
+button{
+    cursor:pointer;
+    padding:10px 20px;
+    background:#222;
+    color:white;
+    border:none;
 }
 </style>
 </head>
@@ -56,7 +67,7 @@ body{
 <div id="panel">
 <p>Оплати і завантаж свою картинку</p>
 
-<a href="ton://transfer/UQBIq4lgh5fLw61AFhgttUko0fwuns9-GZQMNcQg4AoaQkgZ">
+<a href="https://ton.org/transfer/UQBIq4lgh5fLw61AFhgttUko0fwuns9-GZQMNcQg4AoaQkgZ" target="_blank">
 <button>Оплатити</button>
 </a>
 
@@ -72,7 +83,7 @@ const panel = document.getElementById("panel");
 const upload = document.getElementById("upload");
 
 let selectedPixel = null;
-const size = 20; // Зменшено
+const size = 20;
 
 for(let y = 0; y < 1080; y += size){
   for(let x = 0; x < 1920; x += size){
@@ -92,7 +103,6 @@ for(let y = 0; y < 1080; y += size){
 }
 
 upload.onchange = function(e){
-
     if(!selectedPixel) return;
 
     const file = e.target.files[0];
