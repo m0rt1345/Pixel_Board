@@ -1,123 +1,166 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pixel Ads</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Ads | TON Edition</title>
+    <style>
+        body {
+            background: #111;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
 
-<style>
-body{
-    background:#111;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    color:white;
-    margin:0;
-    overflow:hidden;
-}
+        h1 { margin: 20px 0; font-size: 24px; color: #0088cc; }
 
-#board{
-    width:1920px;
-    height:1080px;
-    position:relative;
-    background:#222;
-}
+        /* Контейнер для скролу великої карти */
+        #viewport {
+            width: 95vw;
+            height: 75vh;
+            overflow: auto;
+            border: 2px solid #333;
+            background: #000;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            cursor: crosshair;
+        }
 
-.pixel{
-    width:20px;
-    height:20px;
-    position:absolute;
-    border:1px solid rgba(255,255,255,0.1);
-    cursor:pointer;
-    overflow:hidden;
-}
+        #board {
+            width: 1920px;
+            height: 1080px;
+            position: relative;
+            background-image: 
+                linear-gradient(to right, #222 1px, transparent 1px),
+                linear-gradient(to bottom, #222 1px, transparent 1px);
+            background-size: 20px 20px; /* Сітка */
+        }
 
-.pixel img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
+        .pixel {
+            width: 20px;
+            height: 20px;
+            position: absolute;
+            box-sizing: border-box;
+            transition: background 0.2s;
+        }
 
-#panel{
-    position:fixed;
-    bottom:20px;
-    left:50%;
-    transform:translateX(-50%);
-    background:#000;
-    padding:20px;
-    border:1px solid #555;
-    display:none;
-    z-index:1000;
-}
-button{
-    cursor:pointer;
-    padding:10px 20px;
-    background:#222;
-    color:white;
-    border:none;
-}
-</style>
+        .pixel:hover {
+            outline: 1px solid #0088cc;
+            background: rgba(0, 136, 204, 0.2);
+            z-index: 5;
+        }
+
+        .pixel img {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Панель керування */
+        #panel {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1c1c1c;
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #444;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            z-index: 100;
+            text-align: center;
+        }
+
+        button {
+            background: #0088cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        button:hover { background: #00aaff; }
+
+        input[type="file"] {
+            display: block;
+            margin: 10px auto;
+            font-size: 12px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            cursor: pointer;
+            color: #888;
+        }
+    </style>
 </head>
-
 <body>
 
-<div id="board"></div>
+<h1>💎 Pixel Ads (TON)</h1>
+
+<div id="viewport">
+    <div id="board"></div>
+</div>
 
 <div id="panel">
-<p>Оплати і завантаж свою картинку</p>
-
-<a href="https://ton.org/transfer/UQBIq4lgh5fLw61AFhgttUko0fwuns9-GZQMNcQg4AoaQkgZ" target="_blank">
-<button>Оплатити</button>
-</a>
-
-<br><br>
-
-<input type="file" id="upload" accept="image/*">
-
+    <span class="close-btn" onclick="this.parentElement.style.display='none'">×</span>
+    <p>Крок 1: Оплати 1 TON</p>
+    <a href="ton://transfer/UQBIq4lgh5fLw61AFhgttUko0fwuns9-GZQMNcQg4AoaQkgZ">
+        <button>Сплатити через Wallet</button>
+    </a>
+    <hr style="border: 0.5px solid #333">
+    <p>Крок 2: Завантаж картинку</p>
+    <input type="file" id="upload" accept="image/*">
 </div>
 
 <script>
-const board = document.getElementById("board");
-const panel = document.getElementById("panel");
-const upload = document.getElementById("upload");
+    const board = document.getElementById("board");
+    const panel = document.getElementById("panel");
+    const upload = document.getElementById("upload");
 
-let selectedPixel = null;
-const size = 20;
+    let selectedPixel = null;
+    const size = 20;
 
-for(let y = 0; y < 1080; y += size){
-  for(let x = 0; x < 1920; x += size){
+    // Створюємо пікселі
+    for(let y = 0; y < 1080; y += size){
+        for(let x = 0; x < 1920; x += size){
+            let pixel = document.createElement("div");
+            pixel.className = "pixel";
+            pixel.style.left = x + "px";
+            pixel.style.top = y + "px";
 
-    let pixel = document.createElement("div");
-    pixel.className = "pixel";
-    pixel.style.left = x + "px";
-    pixel.style.top = y + "px";
-
-    pixel.onclick = function(){
-        selectedPixel = pixel;
-        panel.style.display = "block";
+            pixel.onclick = function(e){
+                e.stopPropagation();
+                selectedPixel = pixel;
+                panel.style.display = "block";
+            }
+            board.appendChild(pixel);
+        }
     }
 
-    board.appendChild(pixel);
-  }
-}
-
-upload.onchange = function(e){
-    if(!selectedPixel) return;
-
-    const file = e.target.files[0];
-    const reader = new FileReader();
-
-    reader.onload = function(event){
-        const img = document.createElement("img");
-        img.src = event.target.result;
-
-        selectedPixel.innerHTML = "";
-        selectedPixel.appendChild(img);
+    // Обробка завантаження фото
+    upload.onchange = function(e){
+        if(!selectedPixel) return;
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(event){
+            const img = document.createElement("img");
+            img.src = event.target.result;
+            selectedPixel.innerHTML = "";
+            selectedPixel.appendChild(img);
+            panel.style.display = "none"; // Ховаємо панель після вибору
+        }
+        reader.readAsDataURL(file);
     }
-
-    reader.readAsDataURL(file);
-}
 </script>
 
 </body>
