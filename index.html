@@ -2,166 +2,113 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixel Ads | TON Edition</title>
+    <title>Pixel Ads $0.25</title>
     <style>
-        body {
-            background: #111;
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
+        body { background: #0b0b0b; color: #eee; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; }
+        #viewport { width: 90vw; height: 70vh; overflow: auto; border: 2px solid #0088cc; margin-top: 20px; background: #000; }
+        #board { width: 1000px; height: 1000px; position: relative; cursor: crosshair; }
+        
+        .pixel { 
+            width: 10px; height: 10px; position: absolute; 
+            outline: 0.1px solid rgba(255,255,255,0.03); 
         }
+        .pixel:hover { background: rgba(0, 136, 204, 0.5); }
 
-        h1 { margin: 20px 0; font-size: 24px; color: #0088cc; }
-
-        /* Контейнер для скролу великої карти */
-        #viewport {
-            width: 95vw;
-            height: 75vh;
-            overflow: auto;
-            border: 2px solid #333;
-            background: #000;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            cursor: crosshair;
-        }
-
-        #board {
-            width: 1920px;
-            height: 1080px;
-            position: relative;
-            background-image: 
-                linear-gradient(to right, #222 1px, transparent 1px),
-                linear-gradient(to bottom, #222 1px, transparent 1px);
-            background-size: 20px 20px; /* Сітка */
-        }
-
-        .pixel {
-            width: 20px;
-            height: 20px;
-            position: absolute;
-            box-sizing: border-box;
-            transition: background 0.2s;
-        }
-
-        .pixel:hover {
-            outline: 1px solid #0088cc;
-            background: rgba(0, 136, 204, 0.2);
-            z-index: 5;
-        }
-
-        .pixel img {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        /* Панель керування */
         #panel {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1c1c1c;
-            padding: 25px;
-            border-radius: 15px;
-            border: 1px solid #444;
-            display: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            z-index: 100;
-            text-align: center;
+            position: fixed; bottom: 20px; background: #181818; padding: 20px;
+            border-radius: 12px; border: 1px solid #333; display: none;
+            text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.7); z-index: 100;
         }
-
-        button {
-            background: #0088cc;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        button:hover { background: #00aaff; }
-
-        input[type="file"] {
-            display: block;
-            margin: 10px auto;
-            font-size: 12px;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 5px;
-            right: 10px;
-            cursor: pointer;
-            color: #888;
-        }
+        
+        .price-tag { font-size: 18px; color: #00ccff; font-weight: bold; margin: 10px 0; }
+        button { background: #0088cc; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
+        input[type="file"] { margin-top: 15px; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<h1>💎 Pixel Ads (TON)</h1>
+    <h1>Pixel Board: $0.25 за 200px</h1>
+    <div id="price-info">Завантаження курсу TON...</div>
 
-<div id="viewport">
-    <div id="board"></div>
-</div>
+    <div id="viewport">
+        <div id="board"></div>
+    </div>
 
-<div id="panel">
-    <span class="close-btn" onclick="this.parentElement.style.display='none'">×</span>
-    <p>Крок 1: Оплати 1 TON</p>
-    <a href="ton://transfer/UQBIq4lgh5fLw61AFhgttUko0fwuns9-GZQMNcQg4AoaQkgZ">
-        <button>Сплатити через Wallet</button>
-    </a>
-    <hr style="border: 0.5px solid #333">
-    <p>Крок 2: Завантаж картинку</p>
-    <input type="file" id="upload" accept="image/*">
-</div>
+    <div id="panel">
+        <div id="info-text">Ви купуєте блок 10x20 (200 пікселів)</div>
+        <div class="price-tag" id="ton-price">... TON</div>
+        <a id="ton-link" href="#">
+            <button>Оплатити через TON Wallet</button>
+        </a>
+        <input type="file" id="upload" accept="image/*">
+        <button onclick="document.getElementById('panel').style.display='none'" style="background:none; color:#666; margin-top:10px;">Скасувати</button>
+    </div>
 
-<script>
-    const board = document.getElementById("board");
-    const panel = document.getElementById("panel");
-    const upload = document.getElementById("upload");
+    <script>
+        const board = document.getElementById("board");
+        const panel = document.getElementById("panel");
+        const tonPriceElement = document.getElementById("ton-price");
+        const tonLink = document.getElementById("ton-link");
+        const priceInfo = document.getElementById("price-info");
 
-    let selectedPixel = null;
-    const size = 20;
+        let selectedPixel = null;
+        let tonAmount = 0.05; // Дефолтне значення, якщо API не відповість
 
-    // Створюємо пікселі
-    for(let y = 0; y < 1080; y += size){
-        for(let x = 0; x < 1920; x += size){
-            let pixel = document.createElement("div");
+        // 1. Отримуємо актуальний курс TON
+        async function updatePrice() {
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd');
+                const data = await response.json();
+                const pricePerTon = data['the-open-network'].usd;
+                
+                // Рахуємо скільки TON треба за $0.25
+                tonAmount = (0.25 / pricePerTon).toFixed(3);
+                
+                priceInfo.innerText = `Курс: 1 TON = $${pricePerTon.toFixed(2)}`;
+                tonPriceElement.innerText = `${tonAmount} TON ($0.25)`;
+                
+                // Оновлюємо посилання для оплати (сума в нанотонах)
+                const nanoTon = Math.floor(tonAmount * 1000000000);
+                tonLink.href = `ton://transfer/UQBIq4lgh5fLw61AFhgttUko0fwuns9-GZQMNcQg4AoaQkgZ?amount=${nanoTon}`;
+            } catch (e) {
+                priceInfo.innerText = "Помилка курсу. Використовуємо 0.05 TON";
+            }
+        }
+
+        updatePrice();
+
+        // 2. Створюємо сітку
+        for (let i = 0; i < 10000; i++) {
+            const pixel = document.createElement("div");
             pixel.className = "pixel";
-            pixel.style.left = x + "px";
-            pixel.style.top = y + "px";
-
-            pixel.onclick = function(e){
-                e.stopPropagation();
+            pixel.style.left = (i % 100) * 10 + "px";
+            pixel.style.top = Math.floor(i / 100) * 10 + "px";
+            
+            pixel.onclick = function() {
                 selectedPixel = pixel;
                 panel.style.display = "block";
-            }
+            };
             board.appendChild(pixel);
         }
-    }
 
-    // Обробка завантаження фото
-    upload.onchange = function(e){
-        if(!selectedPixel) return;
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = function(event){
-            const img = document.createElement("img");
-            img.src = event.target.result;
-            selectedPixel.innerHTML = "";
-            selectedPixel.appendChild(img);
-            panel.style.display = "none"; // Ховаємо панель після вибору
-        }
-        reader.readAsDataURL(file);
-    }
-</script>
-
+        // 3. Завантаження картинки (розтягуємо на 200px)
+        document.getElementById("upload").onchange = function(e) {
+            if(!selectedPixel) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = document.createElement("img");
+                img.src = event.target.result;
+                // Робимо картинку розміром 100x20px (це 200 пікселів площі за твоєю умовою)
+                img.style.width = "100px"; 
+                img.style.height = "20px";
+                img.style.position = "absolute";
+                img.style.zIndex = "20";
+                
+                selectedPixel.appendChild(img);
+                panel.style.display = "none";
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        };
+    </script>
 </body>
 </html>
