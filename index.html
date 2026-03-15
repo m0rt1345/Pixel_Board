@@ -5,98 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pixel Ads Fullscreen</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            overflow: hidden; /* Вимикаємо скрол сторінки */
-            font-family: sans-serif;
-        }
-
-        #board {
-            display: grid;
-            width: 100vw;
-            height: 100vh;
-            /* Автоматична сітка: створює стільки колонок по 10px, скільки влізе */
-            grid-template-columns: repeat(auto-fill, 10px);
-            grid-template-rows: repeat(auto-fill, 10px);
-        }
-
-        .pixel {
-            width: 10px;
-            height: 10px;
-            box-sizing: border-box;
-            border: 0.1px solid rgba(255,255,255,0.05);
-            transition: background 0.1s;
-        }
-
-        .pixel:hover {
-            background: rgba(0, 136, 204, 0.4);
-            cursor: pointer;
-            border: 1px solid #0088cc;
-        }
-
-        /* Стиль для завантажених картинок на 200 пікселів (10x20 або 20x10) */
-        .ad-image {
-            position: absolute;
-            pointer-events: none;
-            z-index: 10;
-            object-fit: cover;
-        }
-
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
+        #board { display: grid; width: 100vw; height: 100vh; grid-template-columns: repeat(auto-fill, 10px); grid-template-rows: repeat(auto-fill, 10px); }
+        .pixel { width: 10px; height: 10px; box-sizing: border-box; border: 0.1px solid rgba(255,255,255,0.05); transition: background 0.1s; }
+        .pixel:hover { background: rgba(0, 136, 204, 0.4); cursor: pointer; border: 1px solid #0088cc; }
+        .ad-image { position: absolute; pointer-events: none; z-index: 10; object-fit: cover; }
+        
         #panel {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #1c1c1c;
-            padding: 25px;
-            border-radius: 15px;
-            border: 1px solid #0088cc;
-            display: none;
-            text-align: center;
-            box-shadow: 0 0 50px rgba(0,0,0,1);
-            z-index: 100;
-            color: white;
-            min-width: 250px;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #1c1c1c; padding: 25px; border-radius: 15px; border: 1px solid #0088cc;
+            display: none; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,1);
+            z-index: 100; color: white; min-width: 280px;
         }
-
-        .price-tag { font-size: 22px; color: #00ccff; font-weight: bold; margin: 10px 0; }
-        
-        button { 
-            background: #0088cc; color: white; border: none; padding: 12px; 
-            border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold;
-            margin-top: 10px;
-        }
-        
-        button.secondary { background: #333; margin-top: 15px; font-size: 12px; }
-
-        #status {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.7);
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            color: #00ccff;
-            pointer-events: none;
-        }
+        .price-tag { font-size: 18px; color: #ffdd00; font-weight: bold; margin: 10px 0; }
+        button { border: none; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
+        button.bmc { background: #FFDD00; color: #000; }
+        button.ton { background: #0088cc; color: white; }
+        button.secondary { background: #333; color: white; margin-top: 15px; font-size: 12px; }
+        #status { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 5px; font-size: 12px; color: #00ccff; pointer-events: none; }
     </style>
 </head>
 <body>
 
-    <div id="status">Завантаження курсу...</div>
+    <div id="status">Курс TON завантажується...</div>
     <div id="board"></div>
 
     <div id="panel">
-        <div style="font-size: 14px; color: #aaa;">Розмір: до 200 пікселів</div>
-        <div class="price-tag" id="ton-price">... TON</div>
+        <div style="font-size: 14px; color: #aaa;">Розмір: 200 пікселів</div>
         
+        <div class="price-tag">Картки (Apple Pay): $1.00</div>
+        <a href="https://buymeacoffee.com/m0rt1/e/520506" target="_blank" style="text-decoration:none;">
+            <button class="bmc">☕ Купити за $1.00</button>
+        </a>
+
+        <div class="price-tag" style="margin-top:20px;">Криптовалюта (TON): $0.25</div>
         <a id="ton-link" href="#">
-            <button>Оплатити $0.25 в TON</button>
+            <button class="ton">💎 Оплатити за $0.25 в TON</button>
         </a>
 
         <div style="margin-top: 20px; border-top: 1px dotted #444; padding-top: 15px;">
@@ -110,48 +54,31 @@
     <script>
         const board = document.getElementById("board");
         const panel = document.getElementById("panel");
-        const tonPriceElement = document.getElementById("ton-price");
         const tonLink = document.getElementById("ton-link");
         const status = document.getElementById("status");
+        let selectedX = 0; let selectedY = 0;
 
-        let selectedX = 0;
-        let selectedY = 0;
-        let tonAmount = 0.05;
-
-        // 1. Отримуємо курс TON (CoinGecko API)
-        async function updatePrice() {
+        async function updateTonPrice() {
             try {
-                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd');
-                const data = await response.json();
-                const pricePerTon = data['the-open-network'].usd;
-                
-                tonAmount = (0.25 / pricePerTon).toFixed(3);
+                const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd');
+                const data = await res.json();
+                const price = data['the-open-network'].usd;
+                const tonAmount = (0.25 / price).toFixed(3);
                 const nanoTon = Math.floor(tonAmount * 1000000000);
-                
-                status.innerText = `1 TON = $${pricePerTon.toFixed(2)}`;
-                tonPriceElement.innerText = `${tonAmount} TON`;
+                status.innerText = `1 TON = $${price.toFixed(2)}`;
                 tonLink.href = `ton://transfer/UQBIq4lgh5fLw61AFhgttUko0fwuns9-GZQMNcQg4AoaQkgZ?amount=${nanoTon}`;
-            } catch (e) {
-                status.innerText = "Помилка курсу. Дефолт: 0.05 TON";
-            }
+            } catch(e) { status.innerText = "Курс TON недоступний"; }
         }
+        updateTonPrice();
 
-        updatePrice();
-
-        // 2. Генерація пікселів на весь екран
         function createBoard() {
             board.innerHTML = "";
-            // Розраховуємо скільки пікселів влізе в ширину і висоту
             const cols = Math.floor(window.innerWidth / 10);
             const rows = Math.floor(window.innerHeight / 10);
-            const total = cols * rows;
-
-            for (let i = 0; i < total; i++) {
+            for (let i = 0; i < cols * rows; i++) {
                 const pixel = document.createElement("div");
                 pixel.className = "pixel";
-                
-                pixel.onclick = function(e) {
-                    // Запам'ятовуємо координати кліку для вставки картинки
+                pixel.onclick = function() {
                     selectedX = (i % cols) * 10;
                     selectedY = Math.floor(i / cols) * 10;
                     panel.style.display = "block";
@@ -159,33 +86,21 @@
                 board.appendChild(pixel);
             }
         }
-
         createBoard();
-        window.onresize = createBoard; // Перемальовувати при зміні розміру вікна
+        window.onresize = createBoard;
 
-        // 3. Обробка завантаження картинки
         document.getElementById("upload").onchange = function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(event) {
                 const img = document.createElement("img");
                 img.src = event.target.result;
                 img.className = "ad-image";
-                
-                // Встановлюємо розмір 20x10 пікселів (200px площа)
-                img.style.width = "200px"; 
-                img.style.height = "10px";
-                
-                // Позиціонуємо картинку там, де клікнув юзер
-                img.style.left = selectedX + "px";
-                img.style.top = selectedY + "px";
-                
+                img.style.width = "200px"; img.style.height = "10px";
+                img.style.left = selectedX + "px"; img.style.top = selectedY + "px";
                 document.body.appendChild(img);
                 panel.style.display = "none";
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(e.target.files[0]);
         };
     </script>
 </body>
